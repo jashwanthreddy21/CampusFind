@@ -1,0 +1,410 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with EAMCET preferences and target category",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name",
+          "maxLength": 128
+        },
+        "preferredState": {
+          "type": "string",
+          "enum": ["all", "TS", "AP"],
+          "description": "User preferred state for admissions"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["OC", "BC-A", "BC-B", "BC-C", "BC-D", "BC-E", "SC", "ST", "EWS"],
+          "description": "Reservation category"
+        },
+        "eamcetRank": {
+          "type": "number",
+          "description": "EAMCET rank score"
+        },
+        "targetBranch": {
+          "type": "string",
+          "description": "Target engineering branch",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Profile update timestamp"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "SavedCollege": {
+      "title": "SavedCollege",
+      "description": "Colleges bookmarked by the user for counseling choice filling",
+      "type": "object",
+      "properties": {
+        "collegeId": {
+          "type": "string",
+          "description": "Unique ID of the saved college",
+          "maxLength": 128
+        },
+        "collegeCode": {
+          "type": "string",
+          "description": "EAMCET Counseling code",
+          "maxLength": 32
+        },
+        "collegeName": {
+          "type": "string",
+          "description": "Full official college name",
+          "maxLength": 256
+        },
+        "state": {
+          "type": "string",
+          "enum": ["TS", "AP"],
+          "description": "State of college"
+        },
+        "city": {
+          "type": "string",
+          "description": "City where college is situated",
+          "maxLength": 128
+        },
+        "annualFee": {
+          "type": "number",
+          "description": "Official convenor annual tuition fee in INR"
+        },
+        "rating": {
+          "type": "number",
+          "description": "College rating out of 5"
+        },
+        "savedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when college was saved"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID",
+          "maxLength": 128
+        }
+      },
+      "required": ["collegeId", "collegeCode", "collegeName", "state", "userId"]
+    },
+    "PredictionRecord": {
+      "title": "PredictionRecord",
+      "description": "Saved EAMCET college predictor search queries and results",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Prediction record ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "User UID who ran the predictor",
+          "maxLength": 128
+        },
+        "exam": {
+          "type": "string",
+          "enum": ["TS EAMCET", "AP EAMCET"],
+          "description": "Exam name"
+        },
+        "rank": {
+          "type": "number",
+          "description": "EAMCET rank entered"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category chosen",
+          "maxLength": 32
+        },
+        "branch": {
+          "type": "string",
+          "description": "Branch chosen",
+          "maxLength": 64
+        },
+        "state": {
+          "type": "string",
+          "description": "State filter",
+          "maxLength": 16
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Search timestamp"
+        }
+      },
+      "required": ["id", "userId", "exam", "rank", "category"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Student rating and commentary for a specific college",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique review identifier",
+          "maxLength": 128
+        },
+        "collegeId": {
+          "type": "string",
+          "description": "Target college identifier",
+          "maxLength": 128
+        },
+        "collegeName": {
+          "type": "string",
+          "description": "Target college official name",
+          "maxLength": 256
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the student author",
+          "maxLength": 128
+        },
+        "userName": {
+          "type": "string",
+          "description": "Display name of student reviewer",
+          "maxLength": 128
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Author student email",
+          "maxLength": 256
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating out of 5 (1 to 5)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Headline summary of review",
+          "maxLength": 128
+        },
+        "comment": {
+          "type": "string",
+          "description": "Detailed student feedback and review comments",
+          "maxLength": 1500
+        },
+        "branch": {
+          "type": "string",
+          "description": "Engineering branch or discipline",
+          "maxLength": 64
+        },
+        "batch": {
+          "type": "string",
+          "description": "Graduation batch or current student year",
+          "maxLength": 32
+        },
+        "recommended": {
+          "type": "boolean",
+          "description": "Whether the reviewer recommends this college to peers"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["id", "collegeId", "userId", "userName", "rating", "comment"]
+    }
+    },
+    "CutoffAlert": {
+      "title": "CutoffAlert",
+      "description": "User subscription for cutoff rank changes and counseling round notifications for a specific college",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Alert document ID (collegeId)",
+          "maxLength": 128
+        },
+        "collegeId": {
+          "type": "string",
+          "description": "Target college ID",
+          "maxLength": 128
+        },
+        "collegeCode": {
+          "type": "string",
+          "description": "Target college counseling code",
+          "maxLength": 32
+        },
+        "collegeName": {
+          "type": "string",
+          "description": "College name",
+          "maxLength": 256
+        },
+        "userId": {
+          "type": "string",
+          "description": "User UID",
+          "maxLength": 128
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Notification email",
+          "maxLength": 256
+        },
+        "notifyEmail": {
+          "type": "boolean",
+          "description": "Whether email alerts are enabled"
+        },
+        "notifyInApp": {
+          "type": "boolean",
+          "description": "Whether in-app alerts are enabled"
+        },
+        "counselingCycle": {
+          "type": "string",
+          "description": "Target counseling cycle",
+          "maxLength": 128
+        },
+        "category": {
+          "type": "string",
+          "description": "Reservation category monitored",
+          "maxLength": 32
+        },
+        "branches": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of engineering branches monitored"
+        },
+        "triggerCondition": {
+          "type": "string",
+          "description": "Trigger rule for notifications",
+          "maxLength": 64
+        },
+        "targetRank": {
+          "type": "number",
+          "description": "Optional student target rank"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Alert active status"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["id", "collegeId", "collegeCode", "userId", "userEmail", "isActive"]
+    },
+    "InAppNotification": {
+      "title": "InAppNotification",
+      "description": "In-app notifications for cutoff shifts, round allotments, and counseling bulletins",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Notification ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "User UID",
+          "maxLength": 128
+        },
+        "collegeId": {
+          "type": "string",
+          "description": "College ID",
+          "maxLength": 128
+        },
+        "collegeName": {
+          "type": "string",
+          "description": "College Name",
+          "maxLength": 256
+        },
+        "collegeCode": {
+          "type": "string",
+          "description": "College Code",
+          "maxLength": 32
+        },
+        "title": {
+          "type": "string",
+          "description": "Notification title",
+          "maxLength": 128
+        },
+        "message": {
+          "type": "string",
+          "description": "Notification body message",
+          "maxLength": 500
+        },
+        "type": {
+          "type": "string",
+          "enum": ["cutoff_change", "counseling_round", "seat_allotment", "system"],
+          "description": "Notification category"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether read by user"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp"
+        }
+      },
+      "required": ["id", "userId", "collegeId", "title", "message", "read"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "User profile documents"
+    },
+    "/users/{userId}/saved_colleges/{collegeId}": {
+      "schema": {
+        "$ref": "#/entities/SavedCollege"
+      },
+      "description": "Subcollection of saved colleges for counseling choice filling"
+    },
+    "/users/{userId}/predictions/{predictionId}": {
+      "schema": {
+        "$ref": "#/entities/PredictionRecord"
+      },
+      "description": "Subcollection of saved rank predictor runs"
+    },
+    "/users/{userId}/cutoff_alerts/{collegeId}": {
+      "schema": {
+        "$ref": "#/entities/CutoffAlert"
+      },
+      "description": "Subcollection of cutoff rank notifications and alerts for upcoming counseling cycle"
+    },
+    "/users/{userId}/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/InAppNotification"
+      },
+      "description": "Subcollection of in-app counseling alerts and cutoff changes"
+    },
+    "/colleges/{collegeId}/reviews/{reviewId}": {
+      "schema": {
+        "$ref": "#/entities/Review"
+      },
+      "description": "Student reviews and star ratings for each college"
+    }
+  }
+}

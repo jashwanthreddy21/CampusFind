@@ -1,0 +1,148 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for User profile
+    function isValidUser(data, userId) {
+      return data.uid == userId
+        && data.email is string && data.email.size() <= 256
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 128))
+        && (!('preferredState' in data) || (data.preferredState in ['all', 'TS', 'AP']))
+        && (!('category' in data) || (data.category in ['OC', 'BC-A', 'BC-B', 'BC-C', 'BC-D', 'BC-E', 'SC', 'ST', 'EWS']))
+        && (!('eamcetRank' in data) || (data.eamcetRank is number && data.eamcetRank >= 1 && data.eamcetRank <= 500000))
+        && (!('targetBranch' in data) || (data.targetBranch is string && data.targetBranch.size() <= 64));
+    }
+
+    // Validation for SavedCollege
+    function isValidSavedCollege(data, userId) {
+      return data.userId == userId
+        && data.collegeId is string && data.collegeId.size() <= 128
+        && data.collegeCode is string && data.collegeCode.size() <= 32
+        && data.collegeName is string && data.collegeName.size() <= 256
+        && data.state in ['TS', 'AP']
+        && (!('city' in data) || (data.city is string && data.city.size() <= 128))
+        && (!('annualFee' in data) || (data.annualFee is number && data.annualFee >= 0));
+    }
+
+    // Validation for PredictionRecord
+    function isValidPrediction(data, userId) {
+      return data.userId == userId
+        && data.id is string && data.id.size() <= 128
+        && data.exam in ['TS EAMCET', 'AP EAMCET']
+        && data.rank is number && data.rank >= 1 && data.rank <= 500000
+        && data.category is string && data.category.size() <= 32;
+    }
+
+    // Validation for College Review
+    function isValidReview(data, collegeId, reviewId) {
+      return data.keys().hasAll(['id', 'collegeId', 'userId', 'userName', 'rating', 'comment'])
+        && data.keys().hasOnly(['id', 'collegeId', 'collegeName', 'userId', 'userName', 'userEmail', 'rating', 'title', 'comment', 'branch', 'batch', 'recommended', 'createdAt', 'updatedAt'])
+        && data.id == reviewId
+        && data.collegeId == collegeId
+        && data.userId == request.auth.uid
+        && data.userName is string && data.userName.size() > 0 && data.userName.size() <= 128
+        && (!('collegeName' in data) || (data.collegeName is string && data.collegeName.size() <= 256))
+        && (!('userEmail' in data) || (data.userEmail is string && data.userEmail.size() <= 256))
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.comment is string && data.comment.size() >= 5 && data.comment.size() <= 1500
+        && (!('title' in data) || (data.title is string && data.title.size() <= 128))
+        && (!('branch' in data) || (data.branch is string && data.branch.size() <= 64))
+        && (!('batch' in data) || (data.batch is string && data.batch.size() <= 32))
+        && (!('recommended' in data) || data.recommended is bool)
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 64))
+        && (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    // User document rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // PII Isolation: No listing users
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming(), userId)
+                    && incoming().uid == existing().uid;
+      allow delete: if isOwner(userId);
+
+      // Saved colleges subcollection
+      match /saved_colleges/{collegeId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(collegeId) && isValidSavedCollege(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(collegeId) && isValidSavedCollege(incoming(), userId)
+                      && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // Prediction records subcollection
+      match /predictions/{predictionId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(predictionId) && isValidPrediction(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(predictionId) && isValidPrediction(incoming(), userId)
+                      && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // Cutoff alerts subcollection for registered candidate alerts
+      match /cutoff_alerts/{collegeId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(collegeId)
+                              && incoming().userId == userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // In-app notifications subcollection
+      match /notifications/{notificationId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create, update, delete: if isOwner(userId) && isValidId(notificationId);
+      }
+    }
+
+    // College reviews and ratings
+    match /colleges/{collegeId}/reviews/{reviewId} {
+      allow get, list: if true;
+      allow create: if isSignedIn()
+                    && isValidId(collegeId)
+                    && isValidId(reviewId)
+                    && isValidReview(incoming(), collegeId, reviewId);
+      allow update: if isSignedIn()
+                    && isValidId(collegeId)
+                    && isValidId(reviewId)
+                    && isOwner(existing().userId)
+                    && isValidReview(incoming(), collegeId, reviewId)
+                    && incoming().userId == existing().userId
+                    && incoming().collegeId == existing().collegeId;
+      allow delete: if isSignedIn()
+                    && isValidId(collegeId)
+                    && isValidId(reviewId)
+                    && isOwner(existing().userId);
+    }
+  }
+}

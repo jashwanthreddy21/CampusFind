@@ -1,0 +1,8 @@
+{
+  "name": "CampusFind - TS & AP EAMCET Colleges & Universities",
+  "description": "Complete discovery directory and college predictor for TS EAMCET & AP EAMCET with verified convenor fees, cutoffs, branch placements, and university comparisons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
