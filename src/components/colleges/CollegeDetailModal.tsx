@@ -22,7 +22,8 @@ import {
   Camera,
   Bell,
   BellRing,
-  Sparkles
+  Sparkles,
+  Compass
 } from 'lucide-react';
 import { College } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -39,6 +40,7 @@ import { CollegeImageCarousel } from './CollegeImageCarousel';
 import { CutoffAlertModal } from './CutoffAlertModal';
 import { CollegeScholarshipEligibility } from './CollegeScholarshipEligibility';
 import { AiBranchRecommender } from './AiBranchRecommender';
+import { EngineeringRoadmap } from './EngineeringRoadmap';
 
 interface CollegeDetailModalProps {
   college: College | null;
@@ -49,7 +51,7 @@ export const CollegeDetailModal: React.FC<CollegeDetailModalProps> = ({ college,
   const { user } = useAuth();
   const { isSaved, toggleSave } = useSavedColleges();
   const { isComparing, addCollege, removeCollege } = useComparison();
-  const [activeModalTab, setActiveModalTab] = useState<'overview' | 'photos' | 'placements' | 'cutoffs' | 'branch_recommender' | 'scholarships' | 'location' | 'reviews'>('overview');
+  const [activeModalTab, setActiveModalTab] = useState<'overview' | 'photos' | 'placements' | 'cutoffs' | 'branch_recommender' | 'roadmap' | 'scholarships' | 'location' | 'reviews'>('overview');
   const [selectedCategory, setSelectedCategory] = useState<'OC' | 'BC-A' | 'BC-B' | 'BC-C' | 'BC-D' | 'BC-E' | 'SC' | 'ST' | 'EWS'>('OC');
   const [cutoffViewMode, setCutoffViewMode] = useState<'analytics' | 'table' | 'both'>('both');
   const [copiedLink, setCopiedLink] = useState(false);
@@ -311,6 +313,24 @@ export const CollegeDetailModal: React.FC<CollegeDetailModalProps> = ({ college,
 
           <button
             type="button"
+            onClick={() => setActiveModalTab('roadmap')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+              activeModalTab === 'roadmap'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 text-blue-200" />
+            <span>4-Yr Roadmap</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-bold ${
+              activeModalTab === 'roadmap' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'
+            }`}>
+              Skills & Projects
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveModalTab('scholarships')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeModalTab === 'scholarships'
@@ -419,6 +439,16 @@ export const CollegeDetailModal: React.FC<CollegeDetailModalProps> = ({ college,
               <AiBranchRecommender 
                 college={college} 
                 initialCategory={selectedCategory}
+                onNavigateToCutoffs={() => setActiveModalTab('cutoffs')}
+              />
+            </div>
+          )}
+
+          {/* DEDICATED TAB: 4-YEAR ENGINEERING ROADMAP */}
+          {activeModalTab === 'roadmap' && (
+            <div className="space-y-6 animate-fade-in">
+              <EngineeringRoadmap 
+                college={college}
                 onNavigateToCutoffs={() => setActiveModalTab('cutoffs')}
               />
             </div>
@@ -803,6 +833,38 @@ export const CollegeDetailModal: React.FC<CollegeDetailModalProps> = ({ college,
                 >
                   <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                   <span>Explore Branch Recommendations</span>
+                  <span>→</span>
+                </button>
+              </div>
+
+              {/* 4-Year Engineering Roadmap Preview Banner in Overview Tab */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white border border-blue-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md mt-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
+                    <Compass className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-black text-white">
+                        4-Year Engineering Learning Roadmap
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/30 text-blue-200 border border-blue-400/30">
+                        Skills • Projects • Certifications
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 mt-0.5 max-w-xl">
+                      Suggested 4-year learning path for {college.name}&apos;s popular branches (CSE, AI/ML, ECE VLSI, Data Science) based on current industry placement trends.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTab('roadmap')}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-blue-950 font-bold text-xs transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                >
+                  <Compass className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Open 4-Yr Roadmap</span>
                   <span>→</span>
                 </button>
               </div>
